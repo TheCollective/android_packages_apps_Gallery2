@@ -630,6 +630,7 @@ public class AlbumSetPage extends ActivityState implements
                 activity.startActivity(new Intent(activity, GallerySettings.class));
                 return true;
             }
+*/            
             default:
                 return false;
         }
