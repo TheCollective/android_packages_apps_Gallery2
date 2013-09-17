@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2013 The CyanogenMod Project
+<!-- Copyright (C) 2013 SlimRoms Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -14,5 +14,14 @@
      limitations under the License.
 -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="filtershow_undo_toast">Rückgängig</string>
+    <!--  Text for undo toast message. Only modify if the string is too long to be displayed -->
+    <string name="filtershow_undo_toast">@string/filtershow_undo</string>
+    <!--  Text for redo toast message. Only modify if the string is too long to be displayed -->
+    <string name="filtershow_redo_toast">@string/filtershow_redo</string>
+
+    <!--  Text for the history panel menu item [CHAR LIMIT=20] -->
+    <string name="show_history_panel">Show History</string>
+    <!--  Text for the history panel menu item [CHAR LIMIT=20] -->
+    <string name="hide_history_panel">Hide History</string>
+
 </resources>

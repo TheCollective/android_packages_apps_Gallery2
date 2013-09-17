@@ -39,6 +39,8 @@ import com.android.gallery3d.util.SaveVideoFileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class TrimVideo extends Activity implements
         MediaPlayer.OnErrorListener,
@@ -168,6 +170,7 @@ public class TrimVideo extends Activity implements
         mTrimStartTime = savedInstanceState.getInt(KEY_TRIM_START, 0);
         mTrimEndTime = savedInstanceState.getInt(KEY_TRIM_END, 0);
         mVideoPosition = savedInstanceState.getInt(KEY_VIDEO_POSITION, 0);
+        mSaveVideoTextView.setEnabled(isModified());
     }
 
     // This updates the time bar display (if necessary). It is called by
@@ -225,7 +228,6 @@ public class TrimVideo extends Activity implements
     }
 
     private void trimVideo() {
-
         mDstFileInfo = SaveVideoFileUtils.getDstMp4FileInfo(TIME_STAMP_NAME,
                 getContentResolver(), mUri, getString(R.string.folder_download));
         final File mSrcFile = new File(mSrcVideoPath);
@@ -241,8 +243,22 @@ public class TrimVideo extends Activity implements
                     // Update the database for adding a new video file.
                     SaveVideoFileUtils.insertContent(mDstFileInfo,
                             getContentResolver(), mUri);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     e.printStackTrace();
+                    mHandler.post(new Runnable(){
+                        @Override
+                        public void run(){
+                            Toast.makeText(getApplicationContext(),
+                                getString(R.string.fail_trim),
+                                Toast.LENGTH_SHORT)
+                                .show();
+                            if (mProgress != null) {
+                                mProgress.dismiss();
+                                mProgress = null;
+                            }
+                        }
+                    });
+                    return;
                 }
                 // After trimming is done, trigger the UI changed.
                 mHandler.post(new Runnable() {

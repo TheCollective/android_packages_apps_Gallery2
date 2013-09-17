@@ -256,8 +256,6 @@ public class PhotoModule
     private final Handler mHandler = new MainHandler();
     private PreferenceGroup mPreferenceGroup;
 
-    private int mResetExposure;
-
     private boolean mQuickCapture;
 
     CameraStartUpThread mCameraStartUpThread;
@@ -465,7 +463,6 @@ public class PhotoModule
 
     private void onPreviewStarted() {
         mCameraStartUpThread = null;
-        mResetExposure = mParameters.getExposureCompensation();
         setCameraState(IDLE);
         if (!ApiHelper.HAS_SURFACE_TEXTURE) {
             // This may happen if surfaceCreated has arrived.
@@ -574,6 +571,7 @@ public class PhotoModule
         mFocusManager.setMirror(mirror);
         mFocusManager.setParameters(mInitialParams);
         setupPreview();
+        initSmartCapture();
 
         openCameraCommon();
 
@@ -798,7 +796,7 @@ public class PhotoModule
 
         @Override
         public void onPictureTaken(
-                byte [] jpegData, final android.hardware.Camera camera) {
+                final byte [] jpegData, final android.hardware.Camera camera) {
             if (mPaused) {
                 return;
             }
@@ -866,19 +864,17 @@ public class PhotoModule
             if (!mIsImageCaptureIntent) {
                 // Calculate the width and the height of the jpeg.
                 Size s = mParameters.getPictureSize();
-                ExifInterface exif = Exif.getExif(jpegData);
-                int orientation = Exif.getOrientation(exif);
-                int width, height;
-                if ((mJpegRotation + orientation) % 180 == 0 ||
-                        (mSceneMode == Util.SCENE_MODE_HDR &&
-                            Util.needSamsungHDRFormat())) {
+                final ExifInterface exif = Exif.getExif(jpegData);
+                final int orientation = Exif.getOrientation(exif);
+                final int width, height;
+                if ((mJpegRotation + orientation) % 180 == 0 || isSamsungHDR) {
                     width = s.width;
                     height = s.height;
                 } else {
                     width = s.height;
                     height = s.width;
                 }
-                String title = mNamedImages.getTitle();
+                final String title = mNamedImages.getTitle();
                 long date = mNamedImages.getDate();
                 if (title == null) {
                     Log.e(TAG, "Unbalanced name/data pair");
@@ -897,29 +893,35 @@ public class PhotoModule
                     }
 
                     if (isSamsungHDR) {
-                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                        Bitmap bm = Util.decodeYUV422P(jpegData, width, height);
-                        if (mJpegRotation != 0) {
-                            Matrix matrix = new Matrix();
-                            matrix.postRotate(mJpegRotation);
-                            bm = Bitmap.createBitmap(bm, 0, 0, width, height, matrix, true);
-                        }
-                        if (mJpegRotation % 180 != 0) {
-                            int x = height;
-                            int y = width;
-                            width = x;
-                            height = y;
-                        }
+                        final long finalDate = date;
+                        new Thread(new Runnable() {
+                            public void run() {
+                                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                                Bitmap bm = Util.decodeYUV422P(jpegData, width, height);
+                                if (mJpegRotation != 0) {
+                                    Matrix matrix = new Matrix();
+                                    matrix.postRotate(mJpegRotation);
+                                    bm = Bitmap.createBitmap(bm, 0, 0, width, height, matrix, true);
+                                }
 
-                        bm.compress(Bitmap.CompressFormat.JPEG,
-                                    CameraSettings.getJpegQualityIntValue(mPreferences),
-                                    baos);
+                                bm.compress(Bitmap.CompressFormat.JPEG,
+                                            CameraSettings.getJpegQualityIntValue(mPreferences),
+                                            baos);
 
-                        jpegData = baos.toByteArray();
-                    }
-                    mActivity.getMediaSaveService().addImage(
+                                boolean rotated = (mJpegRotation % 180) != 0;
+
+                                mActivity.getMediaSaveService().addImage(
+                                    baos.toByteArray(), title, finalDate, mLocation,
+                                    rotated ? height : width, rotated ? width : height,
+                                    orientation,  exif, mOnMediaSavedListener, mContentResolver);
+                            }
+                        }).start();
+
+                    } else {
+                        mActivity.getMediaSaveService().addImage(
                             jpegData, title, date, mLocation, width, height,
                             orientation, exif, mOnMediaSavedListener, mContentResolver);
+                    }
                 }
             } else {
                 mJpegImageData = jpegData;
@@ -942,9 +944,6 @@ public class PhotoModule
                     + mJpegCallbackFinishTime + "ms");
             mJpegPictureCallbackTime = 0;
 
-            // reset exposure
-            mParameters.setExposureCompensation(mResetExposure);
-            mCameraDevice.setParameters(mParameters);
         }
     }
 
@@ -1061,8 +1060,6 @@ public class PhotoModule
             animateFlash();
         }
 
-        //save data
-        mResetExposure = mParameters.getExposureCompensation();
         // Set rotation and gps data.
         int orientation;
         // We need to be consistent with the framework orientation (i.e. the
@@ -1073,11 +1070,6 @@ public class PhotoModule
             orientation = mOrientation;
         }
         mJpegRotation = Util.getJpegRotation(mCameraId, orientation);
-        if (mSceneMode == Util.SCENE_MODE_HDR && Util.needSamsungHDRFormat()) {
-            /* samsung actually speficify max range via exposure compinsation */
-            mParameters.setExposureCompensation(mParameters.getMaxExposureCompensation());
-        }
-        mJpegRotation = Util.getJpegRotation(mCameraId, mOrientation);
         mParameters.setRotation(mJpegRotation);
         Location loc = mLocationManager.getCurrentLocation();
         Util.setGpsParameters(mParameters, loc);
@@ -1126,6 +1118,7 @@ public class PhotoModule
         if (ApiHelper.HAS_SURFACE_TEXTURE) {
             if (mActivity.mCameraScreenNail != null) {
                 ((CameraScreenNail) mActivity.mCameraScreenNail).setFullScreen(full);
+                mUI.hideGpsOnScreenIndicator();
             }
             return;
         }
@@ -1148,6 +1141,17 @@ public class PhotoModule
                 CameraSettings.KEY_FLASH_MODE, flashMode,
                 CameraSettings.KEY_WHITE_BALANCE, whiteBalance,
                 CameraSettings.KEY_FOCUS_MODE, focusMode);
+        if (Util.needSamsungHDRFormat()){
+            if (mSceneMode == Util.SCENE_MODE_HDR) {
+                mUI.overrideSettings(CameraSettings.KEY_EXPOSURE,
+                        String.valueOf(mParameters.getMaxExposureCompensation()));
+                mParameters.setExposureCompensation(mParameters.getMaxExposureCompensation());
+            } else {
+                mUI.overrideSettings(CameraSettings.KEY_EXPOSURE, null);
+                mParameters.setExposureCompensation(CameraSettings.readExposure(mPreferences));
+            }
+            mCameraDevice.setParameters(mParameters);
+        }
     }
 
     private void loadCameraPreferences() {
@@ -1168,6 +1172,9 @@ public class PhotoModule
         if (mHandler.hasMessages(SHOW_TAP_TO_FOCUS_TOAST)) {
             mHandler.removeMessages(SHOW_TAP_TO_FOCUS_TOAST);
             showTapToFocusToast();
+        }
+        if (mLocationManager != null) {
+            mLocationManager.updateGpsIndicator();
         }
     }
 
@@ -1390,6 +1397,8 @@ public class PhotoModule
         UsageStatistics.onContentViewChanged(
                 UsageStatistics.COMPONENT_CAMERA, "PhotoModule");
 
+        initSmartCapture();
+
         Sensor gsensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         if (gsensor != null) {
             mSensorManager.registerListener(this, gsensor, SensorManager.SENSOR_DELAY_NORMAL);
@@ -1426,6 +1435,8 @@ public class PhotoModule
         if (msensor != null) {
             mSensorManager.unregisterListener(this, msensor);
         }
+
+        stopSmartCapture();
     }
 
     @Override
@@ -1652,6 +1663,7 @@ public class PhotoModule
             mCameraDevice = null;
             setCameraState(PREVIEW_STOPPED);
             mFocusManager.onCameraReleased();
+            mUI.hideGpsOnScreenIndicator();
         }
     }
 
@@ -1673,6 +1685,28 @@ public class PhotoModule
         startPreview();
         setCameraState(IDLE);
         startFaceDetection();
+    }
+
+    private void initSmartCapture() {
+        if (mActivity.initSmartCapture(mPreferences, false)) {
+            startSmartCapture();
+        } else {
+            stopSmartCapture();
+        }
+    }
+
+    private void startSmartCapture() {
+        Sensor psensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+        if (psensor != null) {
+            mSensorManager.registerListener(this, psensor, SensorManager.SENSOR_DELAY_UI);
+        }
+    }
+
+    private void stopSmartCapture() {
+        Sensor psensor = mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY);
+        if (psensor != null) {
+            mSensorManager.unregisterListener(this, psensor);
+        }
     }
 
     // This can be called by UI Thread or CameraStartUpThread. So this should
@@ -1737,6 +1771,8 @@ public class PhotoModule
         if (mSnapshotOnIdle) {
             mHandler.post(mDoSnapRunnable);
         }
+
+        mActivity.setTrueView(mPreferences);
     }
 
     @Override
@@ -1891,19 +1927,30 @@ public class PhotoModule
         }
 
         // Set JPEG quality.
-        int jpegQuality = CameraProfile.getJpegEncodingQualityParameter(mCameraId,
-                CameraProfile.QUALITY_HIGH);
+        int jpegQuality = Integer.parseInt(mPreferences.getString(
+                CameraSettings.KEY_CAMERA_JPEG,
+                mActivity.getString(R.string.pref_jpeg_default)));
         mParameters.setJpegQuality(jpegQuality);
 
         // For the following settings, we need to check if the settings are
         // still supported by latest driver, if not, ignore the settings.
+
+        // Color effect
+        String colorEffect = mPreferences.getString(
+                CameraSettings.KEY_CAMERA_COLOR_EFFECT,
+                mActivity.getString(R.string.pref_coloreffect_default));
+        if (Util.isSupported(colorEffect, mParameters.getSupportedColorEffects())) {
+            mParameters.setColorEffect(colorEffect);
+        }
 
         // Set exposure compensation
         int value = CameraSettings.readExposure(mPreferences);
         int max = mParameters.getMaxExposureCompensation();
         int min = mParameters.getMinExposureCompensation();
         if (value >= min && value <= max) {
-            mParameters.setExposureCompensation(value);
+            if (mSceneMode != Util.SCENE_MODE_HDR || !Util.needSamsungHDRFormat()) {
+                mParameters.setExposureCompensation(value);
+            }
         } else {
             Log.w(TAG, "invalid exposure range: " + value);
         }
@@ -2052,6 +2099,8 @@ public class PhotoModule
 
         setCameraParametersWhenIdle(UPDATE_PARAM_PREFERENCE);
         mUI.updateOnScreenIndicators(mParameters, mPreferenceGroup, mPreferences);
+        mActivity.setTrueView(mPreferences);
+        initSmartCapture();
     }
 
     @Override
@@ -2195,6 +2244,19 @@ public class PhotoModule
             data = mGData;
         } else if (type == Sensor.TYPE_MAGNETIC_FIELD) {
             data = mMData;
+        } else if (type == Sensor.TYPE_PROXIMITY) {
+            if (mActivity.mShowCameraAppView) {
+                int currentProx = (int) event.values[0];
+                if (currentProx == 0) {
+                    if (mFirstTimeInitialized) {
+                        onShutterButtonFocus(true);
+                    }
+                    if (canTakePicture()) {
+                        onShutterButtonClick();
+                    }
+                }
+            }
+            return;
         } else {
             // we should not be here.
             return;
