@@ -1521,13 +1521,9 @@ public class PhotoModule
     public void onConfigurationChanged(Configuration newConfig) {
         Log.v(TAG, "onConfigurationChanged");
 
-        // Wait for camera initialization
-        try {
-            if (mCameraStartUpThread != null) {
-                mCameraStartUpThread.join();
-            }
-        } catch (InterruptedException iex) {
-            // Ignore.
+        // Ignore until the hardware is started
+        if (mCameraStartUpThread != null) {
+            return;
         }
 
         setDisplayOrientation();
@@ -2118,6 +2114,10 @@ public class PhotoModule
         } else {
             switchCamera();
         }
+    }
+
+    @Override
+    public void onCameraPickerSuperClicked() {
     }
 
     // Preview texture has been copied. Now camera can be released and the
