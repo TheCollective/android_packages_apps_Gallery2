@@ -502,13 +502,10 @@ public class FocusOverlayManager {
         // Put focus indicator to the center. clear reset position
         mUI.clearFocus();
         // Initialize mFocusArea.
-        if (mFocusAreaSupported) {
-            initializeFocusAreas(mPreviewWidth / 2, mPreviewHeight / 2);
-        }
+        mFocusArea = null;
         // Initialize mMeteringArea.
-        if (mMeteringAreaSupported) {
-            initializeMeteringAreas(mPreviewWidth / 2, mPreviewHeight / 2);
-        }
+        mMeteringArea = null;
+
         mFocusDefault = true;
     }
 
@@ -552,9 +549,13 @@ public class FocusOverlayManager {
 
     private boolean needAutoFocusCall() {
         String focusMode = getFocusMode();
+        boolean continuousFocus =
+            Util.isContinuousFocusNeedsAutoFocusCall()
+            && focusMode.equals(Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
+
         return !(focusMode.equals(Parameters.FOCUS_MODE_INFINITY)
-                || focusMode.equals(Parameters.FOCUS_MODE_FIXED)
-                || focusMode.equals(Parameters.FOCUS_MODE_EDOF)
-                || focusMode.equals(Parameters.FOCUS_MODE_CONTINUOUS_PICTURE));
+            || focusMode.equals(Parameters.FOCUS_MODE_FIXED)
+            || focusMode.equals(Parameters.FOCUS_MODE_EDOF)
+            || continuousFocus);
     }
 }

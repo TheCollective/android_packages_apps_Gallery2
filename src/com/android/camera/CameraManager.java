@@ -86,7 +86,7 @@ public class CameraManager {
 
     // Used to retain a copy of Parameters for setting parameters.
     private Parameters mParamsToSet;
-
+    private boolean isPreviewRunning = false;
 
     // This holder is used when we need to pass the exception
     // back to the calling thread. SynchornousQueue doesn't
@@ -145,6 +145,9 @@ public class CameraManager {
          */
         @Override
         public void handleMessage(final Message msg) {
+            if (mCamera == null) {
+                return;
+            }
             try {
                 switch (msg.what) {
                     case RELEASE:
@@ -183,10 +186,12 @@ public class CameraManager {
 
                     case START_PREVIEW_ASYNC:
                         mCamera.startPreview();
+						isPreviewRunning = true;
                         return;
 
                     case STOP_PREVIEW:
                         mCamera.stopPreview();
+						isPreviewRunning = false;
                         return;
 
                     case SET_PREVIEW_CALLBACK_WITH_BUFFER:
@@ -203,7 +208,9 @@ public class CameraManager {
                         return;
 
                     case CANCEL_AUTO_FOCUS:
+					if (mCamera != null && isPreviewRunning) {
                         mCamera.cancelAutoFocus();
+						}
                         return;
 
                     case SET_AUTO_FOCUS_MOVE_CALLBACK:
