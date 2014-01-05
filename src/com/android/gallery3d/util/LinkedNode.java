@@ -18,8 +18,8 @@ package com.android.gallery3d.util;
 
 
 public class LinkedNode {
-    private LinkedNode mPrev;
-    private LinkedNode mNext;
+    protected LinkedNode mPrev;
+    protected LinkedNode mNext;
 
     public LinkedNode() {
         mPrev = mNext = this;
@@ -56,12 +56,13 @@ public class LinkedNode {
         }
 
         public T nextOf(T node) {
-            return (T) (((LinkedNode)node).mNext == mHead ? null : ((LinkedNode)node).mNext);
+            return (T) (node.mNext == mHead ? null : node.mNext);
         }
 
         public T previousOf(T node) {
-            return (T) (((LinkedNode)node).mPrev == mHead ? null : ((LinkedNode)node).mPrev);
+            return (T) (node.mPrev == mHead ? null : node.mPrev);
         }
+
     }
 
     public static <T extends LinkedNode> List<T> newList() {

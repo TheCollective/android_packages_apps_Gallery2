@@ -116,7 +116,7 @@
     <string name="no_albums_alert" msgid="4111744447491690896">"Ingen album tilgjengelig."</string>
     <string name="empty_album" msgid="4542880442593595494">"0 bilder/videoer tilgjengelig."</string>
     <string name="picasa_posts" msgid="1497721615718760613">"Innlegg"</string>
-    <string name="make_available_offline" msgid="5157950985488297112">"Gjør tilgjengelig i frakoblet modus"</string>
+    <string name="make_available_offline" msgid="5157950985488297112">"Gjør tilgjengelig uten nett"</string>
     <string name="sync_picasa_albums" msgid="8522572542111169872">"Last inn på nytt"</string>
     <string name="done" msgid="217672440064436595">"Ferdig"</string>
     <string name="sequence_in_set" msgid="7235465319919457488">"%1$d av %2$d elementer:"</string>
@@ -156,10 +156,10 @@
     <string name="ffx_washout" msgid="4594160692176642735">"Latte"</string>
     <string name="ffx_washout_color" msgid="8034075742195795219">"Litografi"</string>
   <plurals name="make_albums_available_offline">
-    <item quantity="one" msgid="2171596356101611086">"Gjør album tilgjengelig i frakoblet modus."</item>
-    <item quantity="other" msgid="4948604338155959389">"Gjør album tilgjengelige i frakoblet modus."</item>
+    <item quantity="one" msgid="2171596356101611086">"Gjør album tilgjengelig uten nett."</item>
+    <item quantity="other" msgid="4948604338155959389">"Gjør album tilgjengelig uten nett."</item>
   </plurals>
-    <string name="try_to_set_local_album_available_offline" msgid="2184754031896160755">"Dette elementet lagres lokalt og er tilgjengelig i frakoblet modus."</string>
+    <string name="try_to_set_local_album_available_offline" msgid="2184754031896160755">"Dette elementet lagres lokalt og er tilgjengelig uten nett."</string>
     <string name="set_label_all_albums" msgid="4581863582996336783">"Alle album"</string>
     <string name="set_label_local_albums" msgid="6698133661656266702">"Lokale album"</string>
     <string name="set_label_mtp_devices" msgid="1283513183744896368">"MTP-enheter"</string>
@@ -172,7 +172,7 @@
     <string name="import_complete" msgid="3875040287486199999">"Importen er fullført"</string>
     <string name="import_fail" msgid="8497942380703298808">"Import mislyktes"</string>
     <string name="camera_connected" msgid="916021826223448591">"Kamera tilkoblet."</string>
-    <string name="camera_disconnected" msgid="2100559901676329496">"Kamera frakoblet."</string>
+    <string name="camera_disconnected" msgid="2100559901676329496">"Kameraet er frakoblet."</string>
     <string name="click_import" msgid="6407959065464291972">"Trykk her for å importere"</string>
     <string name="widget_type_album" msgid="6013045393140135468">"Velg et album"</string>
     <string name="widget_type_shuffle" msgid="8594622705019763768">"Stokk om på bildene"</string>
@@ -220,7 +220,6 @@
     <string name="cannot_connect_camera" msgid="955440687597185163">"Kan ikke koble til kameraet."</string>
     <string name="camera_disabled" msgid="8923911090533439312">"Kameraet har blitt deaktivert på grunn av retningslinjer for sikkerhet."</string>
     <string name="camera_label" msgid="6346560772074764302">"Kamera"</string>
-    <string name="video_camera_label" msgid="2899292505526427293">"Video"</string>
     <string name="wait" msgid="8600187532323801552">"Vent litt…"</string>
     <string name="no_storage" product="nosdcard" msgid="7335975356349008814">"Sett inn en USB-lagring før du bruker kameraet."</string>
     <string name="no_storage" product="default" msgid="5137703033746873624">"Sett inn et SD-kort før du bruker kameraet."</string>
@@ -339,7 +338,7 @@
     <string name="effect_backdropper_space" msgid="7935661090723068402">"Verdensrommet"</string>
     <string name="effect_backdropper_sunset" msgid="45198943771777870">"Solnedgang"</string>
     <string name="effect_backdropper_gallery" msgid="959158844620991906">"Din video"</string>
-    <string name="bg_replacement_message" msgid="9184270738916564608">"Sett enheten ned."\n"Gå ut av syne et øyeblikk."</string>
+    <string name="bg_replacement_message" msgid="9184270738916564608">"Sett enheten ned.\nGå ut av syne et øyeblikk."</string>
     <string name="video_snapshot_hint" msgid="18833576851372483">"Trykk for å ta et bilde mens du filmer."</string>
     <string name="video_recording_started" msgid="4132915454417193503">"Videoopptaket har startet."</string>
     <string name="video_recording_stopped" msgid="5086919511555808580">"Videoopptaket har stoppet."</string>
@@ -362,6 +361,7 @@
     <string name="accessibility_switch_to_video" msgid="4991396355234561505">"Bytt til video"</string>
     <string name="accessibility_switch_to_panorama" msgid="604756878371875836">"Bytt til panorama"</string>
     <string name="accessibility_switch_to_new_panorama" msgid="8116783308051524188">"Bytt til ny panoramamodus"</string>
+    <string name="accessibility_switch_to_refocus" msgid="4539294619557299903">"Bytt til nytt fokus"</string>
     <string name="accessibility_review_cancel" msgid="9070531914908644686">"Avbryt redigering"</string>
     <string name="accessibility_review_ok" msgid="7793302834271343168">"Redigering fullført"</string>
     <string name="accessibility_review_retake" msgid="659300290054705484">"Ta nytt bilde/video"</string>
@@ -421,7 +421,7 @@
     <string name="set_duration" msgid="5578035312407161304">"Still varighet i sekunder"</string>
     <string name="count_down_title_text" msgid="4976386810910453266">"Teller ned før bildet tas"</string>
     <string name="remember_location_title" msgid="9060472929006917810">"Vil du huske bildestedene?"</string>
-    <string name="remember_location_prompt" msgid="724592331305808098">"Merk bildene og videoene med hvor de ble tatt."\n\n"Andre apper kan bruke denne informasjonen med de lagrede bildene dine."</string>
+    <string name="remember_location_prompt" msgid="724592331305808098">"Merk bildene og videoene med hvor de ble tatt.\n\nAndre apper kan bruke denne informasjonen med de lagrede bildene dine."</string>
     <string name="remember_location_no" msgid="7541394381714894896">"Nei takk"</string>
     <string name="remember_location_yes" msgid="862884269285964180">"Ja"</string>
     <string name="menu_camera" msgid="3476709832879398998">"Kamera"</string>

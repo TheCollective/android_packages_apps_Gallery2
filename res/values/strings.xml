@@ -1,20 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
- * Copyright (C) 2013 The Android Open Source Project
- * Copyright (C) 2013 SlimRoms Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- -->
+<!-- Copyright (C) 2007 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">Gallery</string>
@@ -347,7 +345,7 @@
     <string name="ffx_original">Original</string>
     <!-- String for brown-colored old-fashion looking filter (filtershow_fx_0000_vintage) [CHAR LIMIT=10] -->
     <string name="ffx_vintage">Vintage</string>
-    <!-- String for filter that brightens colors (filtershow_fx_0001_instant) [CHAR LIMIT=10] -->
+    <!-- String for filter that brightens colors like instant cameras(filtershow_fx_0001_instant) [CHAR LIMIT=10] -->
     <string name="ffx_instant">Instant</string>
     <!-- String for filter that washes out colors (filtershow_fx_0002_bleach) [CHAR LIMIT=10] -->
     <string name="ffx_bleach">Bleach</string>
@@ -494,9 +492,6 @@
     <!-- The title of the menu item which display online help in browser. [CHAR LIMIT=20]-->
     <string name="help">Help</string>
 
-    <!-- Web address for gallery help.  DO NOT TRANSLATE -->
-    <string name="help_url_gallery_main" translatable="false"></string>
-
     <!-- The tilte of a dialog showing there is no external storage. [CHAR LIMIT=20] -->
     <string name="no_external_storage_title">No Storage</string>
 
@@ -526,6 +521,9 @@
 
     <!-- Toast if the trimmed video is too short to trim. [CHAR LIMIT=80] -->
     <string name="trim_too_short">Can not trim : target video is too short</string>
+
+    <!-- Toast if the muted video is not supported. [CHAR LIMIT=80] -->
+    <string name="mute_nosupport">Can not mute : not supported video</string>
 
     <!-- Text to show with progress bar while stitching in Gallery -->
     <string name="pano_progress_text">Rendering panorama</string>
@@ -573,9 +571,6 @@
 
     <!-- label for the icon meaning 'show me all the images that were taken with the camera' -->
     <string name="camera_label">Camera</string>
-
-    <!-- label for the 'video recording application shown in the top level 'all applications' -->
-    <string name="video_camera_label">Camcorder</string>
 
     <!-- alert to the user to wait for some operation to complete -->
     <string name="wait">Please wait\u2026</string>
@@ -947,6 +942,8 @@
     <string name="accessibility_switch_to_panorama">Switch to panorama</string>
     <!-- The button to switch to new Panorama mode. [CHAR LIMIT = NONE] -->
     <string name="accessibility_switch_to_new_panorama">Switch to new panorama</string>
+    <!-- The button to switch to the Re-Focus mode. [CHAR LIMIT = NONE] -->
+    <string name="accessibility_switch_to_refocus">Switch to Refocus</string>
     <!-- The button in review mode indicating that the photo taking, video recording, and panorama saving session should be canceled [CHAR LIMIT = NONE] -->
     <string name="accessibility_review_cancel">Review cancel</string>
     <!-- The button in review mode indicating that the taken photo/video is OK to be attached/uploaded [CHAR LIMIT = NONE] -->
@@ -1102,108 +1099,4 @@ CHAR LIMIT = NONE] -->
         <item quantity="one">%1$d photo</item>
         <item quantity="other">%1$d photos</item>
     </plurals>
-
-    <!-- More Settings screen, storage title -->
-    <string name="pref_camera_storage_title">Storage</string>
-
-    <!-- Settings screen, dialog choice for 12.8 megapixels picture size [CHAR LIMIT=15] -->
-    <string name="pref_camera_picturesize_entry_12_8mp">12.8M pixels</string>
-    <!-- Settings screen, dialog choice for 11.5 megapixels picture size [CHAR LIMIT=15] -->
-    <string name="pref_camera_picturesize_entry_11_5mp">11.5M pixels</string>
-    <!-- Settings screen, dialog choice for 9 megapixels picture size [CHAR LIMIT=15] -->
-    <string name="pref_camera_picturesize_entry_9mp">9M pixels</string>
-    <!-- Settings screen, dialog choice for 6.4 megapixels picture size [CHAR LIMIT=15] -->
-    <string name="pref_camera_picturesize_entry_6_4mp">6.4M pixels</string>
-    <!-- Settings screen, dialog choice for 6 megapixels picture size [CHAR LIMIT=15] -->
-    <string name="pref_camera_picturesize_entry_6mp">6M pixels</string>
-    <!-- Settings screen, dialog choice for 4.5 megapixels picture size [CHAR LIMIT=15] -->
-    <string name="pref_camera_picturesize_entry_4_5mp">4.5M pixels</string>
-    <!-- Settings screen, dialog choice for 3.7 megapixels picture size [CHAR LIMIT=15] -->
-    <string name="pref_camera_picturesize_entry_3_7mp">3.7M pixels</string>
-    <!-- Settings screen, dialog choice for 2.5 megapixels picture size [CHAR LIMIT=15] -->
-    <string name="pref_camera_picturesize_entry_2_5mp">2.5M pixels</string>
-    <!-- Settings screen, dialog choice for 2.1 megapixels picture size [CHAR LIMIT=15] -->
-    <string name="pref_camera_picturesize_entry_2_1mp">2.1M pixels</string>
-    <!-- Settings screen, dialog choice for 1.9 megapixels picture size [CHAR LIMIT=15] -->
-    <string name="pref_camera_picturesize_entry_1_9mp">1.9M pixels</string>
-    <!-- Settings screen, dialog choice for 1.5 megapixels picture size [CHAR LIMIT=15] -->
-    <string name="pref_camera_picturesize_entry_1_5mp">1.5M pixels</string>
-    <!-- Settings screen, dialog choice for WXGA picture size [CHAR LIMIT=15] -->
-    <string name="pref_camera_picturesize_entry_wxga">WXGA</string>
-    <!-- Settings screen, dialog choice for XGA picture size [CHAR LIMIT=15] -->
-    <string name="pref_camera_picturesize_entry_xga">XGA</string>
-    <!-- Settings screen, dialog choice for SVGA picture size [CHAR LIMIT=15] -->
-    <string name="pref_camera_picturesize_entry_svga">SVGA</string>
-    <!-- Settings screen, dialog choice for WVGA picture size [CHAR LIMIT=15] -->
-    <string name="pref_camera_picturesize_entry_wvga">WVGA</string>
-    <!-- Settings screen, dialog choice for WQVGA picture size [CHAR LIMIT=15] -->
-    <string name="pref_camera_picturesize_entry_wqvga">WQVGA</string>
-
-    <string name="pref_gallery_misc_title">Misc Settings</string>
-
-    <!-- Smart Control -->
-    <string name="pref_smart_control_title">Smart Control</string>
-    <string name="pref_smart_control_summary">Play/Pause video playback by waving hand over screen</string>
-
-    <!-- The label for the bass boost knob of the audio effects dialog. -->
-    <string name="bass_boost_strength">Bass boost</string>
-
-    <!-- The label for the 3d effect knob of the audio effects dialog. -->
-    <string name="virtualizer_strength">3D effect</string>
-
-    <!-- The label for the audio effects menu. -->
-    <string name="audio_effects">Audio effects</string>
-
-    <!-- Toast if user attempts to control audio effects without headphones plugged in. -->
-    <string name="headset_plug">Plug in headphones for these effects.</string>
-
-    <!-- The tips of trimming video -->
-    <string name="fail_trim">Sorry, this video file can not be trimmed</string>
-    <string name="can_not_trim">Only mp4 file can be trimmed</string>
-
-    <!-- The label for Smart capture. -->
-    <string name="pref_smart_capture_label">Smart capture</string>
-    <string name="pref_smart_capture_title">Smart capture</string>
-    <string name="pref_smart_capture_default">@string/setting_off_value</string>
-
-    <!-- True View -->
-    <string name="pref_true_view_label">True View</string>
-    <string name="pref_true_view_title">True View</string>
-    <string name="pref_true_view_default">@string/setting_off_value</string>
-
-    <!-- Settings screen, Select Color effect title -->
-    <string name="pref_coloreffect_title">Color effect</string>
-
-    <!-- Default color effect setting. -->
-    <string name="pref_coloreffect_default" translatable="false">none</string>
-
-    <!-- Settings screen, Color effect dialog radio button choices -->
-    <string name="pref_coloreffect_entry_none">None</string>
-    <string name="pref_coloreffect_entry_mono">Mono</string>
-    <string name="pref_coloreffect_entry_sepia">Sepia</string>
-    <string name="pref_coloreffect_entry_negative">Negative</string>
-    <string name="pref_coloreffect_entry_solarize">Solarize</string>
-    <string name="pref_coloreffect_entry_posterize">Posterize</string>
-    <string name="pref_coloreffect_entry_aqua">Aqua</string>
-    <string name="pref_coloreffect_entry_emboss">Emboss</string>
-    <string name="pref_coloreffect_entry_sketch">Sketch</string>
-    <string name="pref_coloreffect_entry_neon">Neon</string>
-    <string name="pref_coloreffect_entry_pastel">Pastel</string>
-    <string name="pref_coloreffect_entry_mosaic">Mosaic</string>
-    <string name="pref_coloreffect_entry_redtint">Red tint</string>
-    <string name="pref_coloreffect_entry_bluetint">Blue tint</string>
-    <string name="pref_coloreffect_entry_greentint">Green tint</string>
-
-    <!-- Settings screen, JPEG Quality -->
-    <string name="pref_jpeg_title">JPEG Quality</string>
-    <string name="pref_jpeg_default" translatable="false">90</string>
-
-    <!-- Settings screen, JPEG dialog radio button choices -->
-    <string name="pref_jpeg_entry_super">Super</string>
-    <string name="pref_jpeg_entry_high">High</string>
-    <string name="pref_jpeg_entry_medium">Medium</string>
-    <string name="pref_jpeg_entry_low">Low</string>
-
-    <!-- The button to switch to the Gallery. [CHAR LIMIT = NONE] -->
-    <string name="accessibility_switch_to_gallery">Switch to gallery</string>
 </resources>

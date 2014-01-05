@@ -18,9 +18,4 @@ package com.android.gallery3d.app;
 
 public class FilmstripPage extends PhotoPage {
 
-    @Override
-    protected int getStartSourceIndex() {
-        // The camera itself
-        return 1;
-    }
 }

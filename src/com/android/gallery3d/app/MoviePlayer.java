@@ -18,7 +18,6 @@ package com.android.gallery3d.app;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
-import android.app.KeyguardManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -26,12 +25,6 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.graphics.Color;
-import android.hardware.SensorEventListener;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.audiofx.AudioEffect;
@@ -40,7 +33,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.preference.PreferenceManager;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
@@ -50,7 +42,6 @@ import android.widget.VideoView;
 import com.android.gallery3d.R;
 import com.android.gallery3d.common.ApiHelper;
 import com.android.gallery3d.common.BlobCache;
-import com.android.gallery3d.settings.GallerySettings;
 import com.android.gallery3d.util.CacheManager;
 import com.android.gallery3d.util.GalleryUtils;
 
@@ -61,7 +52,7 @@ import java.io.DataOutputStream;
 
 public class MoviePlayer implements
         MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener,
-        ControllerOverlay.Listener, SensorEventListener {
+        ControllerOverlay.Listener {
     @SuppressWarnings("unused")
     private static final String TAG = "MoviePlayer";
 
@@ -96,9 +87,6 @@ public class MoviePlayer implements
     private long mResumeableTime = Long.MAX_VALUE;
     private int mVideoPosition = 0;
     private boolean mHasPaused = false;
-    private boolean mVideoHasPaused = false;
-    private boolean mCanResumed = false;
-    private boolean mKeyguardLocked = false;
     private int mLastSystemUiVis = 0;
 
     // If the time bar is being dragged.
@@ -106,8 +94,6 @@ public class MoviePlayer implements
 
     // If the time bar is visible.
     private boolean mShowing;
-
-    private SensorManager mSensorManager;
 
     private Virtualizer mVirtualizer;
 
@@ -130,21 +116,6 @@ public class MoviePlayer implements
         }
     };
 
-    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
-                mKeyguardLocked = true;
-            } else if (Intent.ACTION_USER_PRESENT.equals(intent.getAction())) {
-                if ((mCanResumed) && (!mVideoHasPaused)) {
-                    playVideo();
-                }
-                mKeyguardLocked = false;
-                mCanResumed = false;
-            }
-        }
-    };
-
     public MoviePlayer(View rootView, final MovieActivity movieActivity,
             Uri videoUri, Bundle savedInstance, boolean canReplay) {
         mContext = movieActivity.getApplicationContext();
@@ -161,29 +132,16 @@ public class MoviePlayer implements
         mVideoView.setOnErrorListener(this);
         mVideoView.setOnCompletionListener(this);
         mVideoView.setVideoURI(mUri);
-        if (mVirtualizer != null) {
-            mVirtualizer.release();
-            mVirtualizer = null;
-        }
 
         Intent ai = movieActivity.getIntent();
         boolean virtualize = ai.getBooleanExtra(VIRTUALIZE_EXTRA, false);
         if (virtualize) {
             int session = mVideoView.getAudioSessionId();
             if (session != 0) {
-                Virtualizer virt = new Virtualizer(0, session);
-                AudioEffect.Descriptor descriptor = virt.getDescriptor();
-                String uuid = descriptor.uuid.toString();
-                if (uuid.equals("36103c52-8514-11e2-9e96-0800200c9a66") ||
-                        uuid.equals("36103c50-8514-11e2-9e96-0800200c9a66")) {
-                    mVirtualizer = virt;
-                    mVirtualizer.setEnabled(true);
-                } else {
-                    // This is not the audio virtualizer we're looking for
-                    virt.release();
-                }
+                mVirtualizer = new Virtualizer(0, session);
+                mVirtualizer.setEnabled(true);
             } else {
-                Log.w(TAG, "no session");
+                Log.w(TAG, "no audio session to virtualize");
             }
         }
         mVideoView.setOnTouchListener(new View.OnTouchListener() {
@@ -191,6 +149,17 @@ public class MoviePlayer implements
             public boolean onTouch(View v, MotionEvent event) {
                 mController.show();
                 return true;
+            }
+        });
+        mVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer player) {
+                if (!mVideoView.canSeekForward() || !mVideoView.canSeekBackward()) {
+                    mController.setSeekable(false);
+                } else {
+                    mController.setSeekable(true);
+                }
+                setProgress();
             }
         });
 
@@ -212,12 +181,6 @@ public class MoviePlayer implements
 
         mAudioBecomingNoisyReceiver = new AudioBecomingNoisyReceiver();
         mAudioBecomingNoisyReceiver.register();
-
-        // Listen for broadcasts related to user-presence
-        final IntentFilter filter = new IntentFilter();
-        filter.addAction(Intent.ACTION_SCREEN_OFF);
-        filter.addAction(Intent.ACTION_USER_PRESENT);
-        mContext.registerReceiver(mReceiver, filter);
 
         Intent i = new Intent(SERVICECMD);
         i.putExtra(CMDNAME, CMDPAUSE);
@@ -328,10 +291,6 @@ public class MoviePlayer implements
             // If we have slept for too long, pause the play
             if (System.currentTimeMillis() > mResumeableTime) {
                 pauseVideo();
-            } else if (mKeyguardLocked){
-                // If Keyguard Locked , pause the play
-                mCanResumed = true;
-                mVideoView.pause();
             }
         }
         mHandler.post(mProgressChecker);
@@ -344,13 +303,6 @@ public class MoviePlayer implements
         }
         mVideoView.stopPlayback();
         mAudioBecomingNoisyReceiver.unregister();
-
-        // Unregister the sensor listener
-        if (mSensorManager != null) {
-            mSensorManager.unregisterListener(this,
-                    mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY));
-        }
-        mContext.unregisterReceiver(mReceiver);
     }
 
     // This updates the time bar display (if necessary). It is called every
@@ -379,16 +331,6 @@ public class MoviePlayer implements
             mController.hide();
         }
 
-        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(mContext);
-        boolean mSmartControl = (boolean) sp.getBoolean(GallerySettings.SMART_CONTROL, false);
-        if (mSmartControl) {
-            // Register the sensor listener
-            mSensorManager = (SensorManager) mContext.getSystemService(Context.SENSOR_SERVICE);
-            mSensorManager.registerListener(this,
-                    mSensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY),
-                    SensorManager.SENSOR_DELAY_UI);
-        }
-
         mVideoView.start();
         setProgress();
     }
@@ -397,14 +339,11 @@ public class MoviePlayer implements
         mVideoView.start();
         mController.showPlaying();
         setProgress();
-        mVideoHasPaused = false;
     }
 
     private void pauseVideo() {
         mVideoView.pause();
-        setProgress();
         mController.showPaused();
-        mVideoHasPaused = true;
     }
 
     // Below are notifications from VideoView
@@ -469,18 +408,6 @@ public class MoviePlayer implements
     @Override
     public void onReplay() {
         startVideo();
-    }
-
-    @Override
-    public void onSensorChanged(SensorEvent event) {
-        int currentProx = (int) event.values[0];
-        if (currentProx == 0) {
-            onPlayPause();
-        }
-    }
-
-    @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
 
     // Below are key events passed from MovieActivity.
@@ -548,14 +475,6 @@ public class MoviePlayer implements
         public void onReceive(Context context, Intent intent) {
             if (mVideoView.isPlaying()) pauseVideo();
         }
-    }
-
-    public int getAudioSessionId() {
-        return mVideoView.getAudioSessionId();
-    }
-
-    public void setOnPreparedListener(MediaPlayer.OnPreparedListener listener) {
-        mVideoView.setOnPreparedListener(listener);
     }
 }
 
